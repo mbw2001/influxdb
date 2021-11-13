@@ -1,5 +1,5 @@
 {
-    "name": "influxdb",
+    "name": "InfluxDB",
     "render_readme": true,
     "domains": ["sensor"]
 }
