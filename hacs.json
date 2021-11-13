@@ -1,0 +1,5 @@
+{
+    "name": "influxdb",
+    "render_readme": true,
+    "domains": ["sensor"]
+}
