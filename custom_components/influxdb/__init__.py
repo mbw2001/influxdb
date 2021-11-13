@@ -1,4 +1,4 @@
-""" Custom influxdb component """
+""" Custom InfluxDB component """
 import logging
 
 from homeassistant.config_entries import ConfigEntry, ConfigType, SOURCE_IMPORT
@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS = ["sensor"]
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Configure Open Hardware Monitor using config flow only."""
+    """Configure InfluxDB using config flow only."""
     if DOMAIN in config:
         for entry in config[DOMAIN]:
             hass.async_create_task(
@@ -19,20 +19,14 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
                     DOMAIN, context={"source": SOURCE_IMPORT}, data=entry
                 )
             )
-
     return True
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Configure Open Hardware Monitor from config entry."""
-    client = OpenHardwareMonitor(hass, config_entry)
-    hass.data.setdefault(DOMAIN, {})[config_entry.entry_id] = client
-    if not await client.async_setup():
-        return False
-
+    """Configure InfluxDB from config entry."""
     return True
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry):
-    """Unload a config entry."""
+    """Unload InfluxDB config entry."""
     unload_ok = await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(config_entry.entry_id)
