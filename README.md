@@ -1,2 +1,2 @@
-# influxdb
-Custom component for influxdb
+# InfluxDB
+Custom component for InfluxDB
