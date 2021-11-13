@@ -1,1 +1,1 @@
-
+""" Custom influxdb component """
