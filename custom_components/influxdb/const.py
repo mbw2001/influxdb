@@ -1,1 +1,3 @@
 DOMAIN = "openhardwaremonitor"
+DEFAULT_PORT = 8086
+DEFAULT_SCAN_INTERVAL = 15
