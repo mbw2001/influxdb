@@ -1,0 +1,21 @@
+{
+    "config": {
+        "error": {
+            "cannot_connect": "Kan ikke forbinde til database."
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "host": "Hostnavn",
+                    "port": "Port",
+                    "ssl": "Brug SSL",
+                    "token": "Token",
+                    "organization": "Organisation"
+                },
+                "description": "InfluxDB",
+                "title": "InfluxDB"
+            }
+        },
+        "title": "InfluxDB"
+    }
+}
