@@ -1,0 +1,10 @@
+{
+    "domain": "influxdb_custom",
+    "name": "InfluxDB",
+    "documentation": "https://www.home-assistant.io/integrations/influxdb",
+    "requirements": ["influxdb==5.2.3", "influxdb-client==1.14.0"],
+    "codeowners": ["@mbw2001"],
+    "dependencies": ["sensor"],
+    "config_flow": true,
+    "version": "0.0.1"
+}
