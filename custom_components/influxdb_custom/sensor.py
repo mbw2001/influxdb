@@ -6,9 +6,8 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import PlatformNotReady
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.dispatcher import async_dispatcher_connect
 
-from .const import DOMAIN, DATA_UPDATED
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,34 +18,24 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
 
     try:
         await hass.async_add_executor_job(client.ready)
-        api = client.query_api()
-    except PlatformNotReady as err:
-        raise PlatformNotReady
-        
-    devices = [(
-        'Bathroom Humidity Stvdev',
-        'from(bucket: "telegraf") |> range(start: -12h) |> filter(fn: (r) => r["_measurement"] == "mqtt_consumer" and r["_field"] == "humidity" and r["topic"] == "zigbee2mqtt/Badeværelse Luftsensor") |> stddev()',
-        ''
-    )]
+    except Exception as err:
+        raise PlatformNotReady(err)
 
-    async_add_entities(
-        [InfluxDBSensor(hass, api, *entity) for entity in devices],
-        True
-    )
+    async_add_entities([InfluxDBSensor(hass, client, *entity)
+                       for entity in client.devices], True)
+
 
 class InfluxDBSensor(SensorEntity):
     """Device used to display information from Open Hardware Monitor."""
 
-    def __init__(self, hass, api, name, query, unit_of_measurement):
+    def __init__(self, hass, client, name, state, unit_of_measurement):
         """Initialize an InfluxDB."""
         self.hass = hass
-        self.api = api
+        self.client = client
         self._name = name
-        self.query = query
-        self._available = True
+        self._state = state
         self.attributes = {}
         self._unit_of_measurement = unit_of_measurement
-        self.unsub_update = None
 
     @property
     def unique_id(self) -> str:
@@ -56,7 +45,7 @@ class InfluxDBSensor(SensorEntity):
     @property
     def available(self):
         """Could the device be accessed during the last update call."""
-        return self._available
+        return self._state != None
 
     @property
     def native_value(self):
@@ -67,22 +56,6 @@ class InfluxDBSensor(SensorEntity):
     def should_poll(self):
         """Return the polling requirement for this sensor."""
         return True
-
-    async def async_added_to_hass(self):
-        """Handle entity which will be added."""
-        self.unsub_update = async_dispatcher_connect(
-            self.hass, DATA_UPDATED, self._schedule_immediate_update
-        )
-
-    @callback
-    def _schedule_immediate_update(self):
-        self.async_schedule_update_ha_state(True)
-
-    async def will_remove_from_hass(self):
-        """Unsubscribe from update dispatcher."""
-        if self.unsub_update:
-            self.unsub_update()
-        self.unsub_update = None
 
     @property
     def name(self):
@@ -99,10 +72,6 @@ class InfluxDBSensor(SensorEntity):
         """Return the state attributes of the entity."""
         return self.attributes
 
-    def run_query(self):
-        return self.api.query(self.query)
-
     async def async_update(self):
-        tables = await self.hass.async_add_executor_job(self.run_query)
-        self._state = tables[0].records[0].values['_value']
         _LOGGER.debug(f"Updating sensor {self._name}")
+        self.client.get_value(0)
